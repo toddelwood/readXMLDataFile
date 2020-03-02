@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Read XML File</title>
+    <link rel="stylesheet" href="./readXMLDataFile.css">
+    <!-- script src="readXMLFile.js"></script-->
+</head>
+<body>
+
+<h1><bold>Reading Data from XML File</bold></h1>
+<main>
+
+    <ul id="owners"></ul>
+    <ul id="condolist"></ul>
+    <pre id="list"></pre>
+</main>
+
+<script>
+
+    const prop = {
+        id:0,
+        fname:1,
+        lname:2,
+        bedrooms:3,
+        bath:4,
+        pets:5,
+        carport:6,
+        storage:7,
+        unitRented:8
+    }
+
+    function createHeader() {
+        let arrHeader = ["#","ID","First Name","Last Name","Bedrooms","Baths","Pets","CarPort","Storage","Unit Rented"];
+        //console.log("Length of Header " + arrHeader.length);
+    }
+
+    function buildTable() {
+        let xml="./condoList.xml";
+        let table = document.createElement("table");
+        table.className="gridtable";
+
+        let thead = document.createElement("thead");
+        let tbody = document.createElement("tbody");
+        let headRow = document.createElement("tr");
+
+        ["ID","First Name","Last Name","Bedrooms","Baths","Pets","CarPort","Storage","Unit Rented"].forEach(function(header) {
+            let th=document.createElement("th");
+            th.appendChild(document.createTextNode(header));
+            headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        table.appendChild(tbody);
+
+
+        fetch(xml)
+            .then(response => {
+            return response.text();
+    })
+    .then(data => {
+            let parser = new DOMParser();
+        let xml = parser.parseFromString(data,"text/xml");
+        let owners = xml.getElementsByTagName('owners');
+
+        for (let i = 0; i < owners.length; i++) {
+
+            let tr = document.createElement("tr");
+            let ans;
+
+            for (let j = 0; j < owners[0].children.length; j++) {
+
+
+                let cellData =  document.createTextNode(owners[i].children[j].textContent);
+                if ((cellData==null) || (cellData.length <= 0)) {
+
+                    cellData.textContent="?";
+                }
+
+                console.log(cellData);
+                switch (j) {
+                    case 8:
+                        ans =  (cellData == 1 ? 'Yes' : 'No');
+                        cellData=document.createTextNode(ans);
+                    //break;
+                }
+
+                //tr.appendChild(createCell(document.createTextNode(owners[i].children[j].textContent)));
+                tr.appendChild(createCell(cellData));
+
+                //tr.style.backgroundColor="red";
+
+                //Works for red text
+                //tr.style.color="red";
+
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+        }
+
+    })
+    .catch(err => {
+            console.log("Failure ".concat(err.message));
+    })
+        return table;
+    }
+
+    function createCell(str) {
+        let td = document.createElement("td");
+        td.appendChild(str);
+        return td;
+    }
+
+    window.onload=function() {
+        createHeader();
+        document.getElementById("list").appendChild(buildTable());
+    }
+
+
+</script>
+
+
+</body>
+
+</html>
